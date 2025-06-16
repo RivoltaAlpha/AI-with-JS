@@ -7,7 +7,7 @@ import path from  'path'
 dotenv.config()
 
 const token = process.env["GITHUB_TOKEN"];
-console.log(token)
+// console.log(token)
 const endpoint = "https://models.github.ai/inference";
 const model = "meta/Llama-4-Maverick-17B-128E-Instruct-FP8";
 
@@ -22,14 +22,25 @@ export async function main() {
     endpoint,
     new AzureKeyCredential(token),
 
-    console.log(AzureKeyCredential)
+    // console.log(AzureKeyCredential)
   );
 
   const response = await client.path("/chat/completions").post({
     body: {
       messages: [
-        { role:"system", content: "You are a skilled React dev." },
-        { role:"user", content: "What is the capital of France?" }
+        { role:"system", content: "You are a skilled HTML n CSS dev." },
+        { role:"user", content: [
+            {
+                type: "text",
+                text: "Generate a HTML and CSS code based on the following layout sketch."
+                },
+                {
+                type: "image_url",
+                image_url: {
+                    url: `data:image/jpeg;base64,${imageBase64}`
+                }
+            }
+        ] },
       ],
       temperature: 1.0,
       top_p: 1.0,
