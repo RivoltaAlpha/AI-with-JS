@@ -52,7 +52,7 @@ module webapp 'br/public:avm/res/web/static-site:0.7.0' = {
   }
 }
 
-param webapiName string = 'webapi'
+param webapiName string = 'webapi-unique123'
 param appServicePlanName string = 'appserviceplan'
 
 module serverfarm 'br/public:avm/res/web/serverfarm:0.4.1' = {
@@ -65,12 +65,13 @@ module serverfarm 'br/public:avm/res/web/serverfarm:0.4.1' = {
 }
 
 module webapi 'br/public:avm/res/web/site:0.15.1' = {
-  name: 'webapi'
+  name: webapiName
   scope: resourceGroup
   params: {
     kind: 'app'
     name: webapiName
     serverFarmResourceId: serverfarm.outputs.resourceId
+    tags: union(tags, { 'azd-service-name': webapiName })
   }
 }
 

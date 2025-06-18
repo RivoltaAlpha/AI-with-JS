@@ -22,3 +22,4 @@ services:
         project: packages/webapi
         host: appservice
         language: js
+        resourceName: webapi-unique123
