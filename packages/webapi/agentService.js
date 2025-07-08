@@ -8,16 +8,43 @@ const agentThreads = {};
 
 export class AgentService {
   constructor() {
-    this.client = AIProjectsClient.fromConnectionString(
-      "<YOUR_CONNECTION_STRING>",
-      new DefaultAzureCredential()
-    );
+    // Use environment variables instead of hardcoded values
+    const connectionString = process.env.AZURE_AI_PROJECT_CONNECTION_STRING;
+    const agentId = process.env.AZURE_AI_AGENT_ID;
     
-    // The agent ID from your agent.yaml file
-    this.agentId = "<YOUR_AGENT_ID>";
+    if (!connectionString || connectionString === "<YOUR_CONNECTION_STRING>") {
+      console.warn("Azure AI Project connection string not configured. Please set AZURE_AI_PROJECT_CONNECTION_STRING environment variable.");
+      this.client = null;
+      this.agentId = null;
+      return;
+    }
+    
+    if (!agentId || agentId === "<YOUR_AGENT_ID>") {
+      console.warn("Azure AI Agent ID not configured. Please set AZURE_AI_AGENT_ID environment variable.");
+      this.client = null;
+      this.agentId = null;
+      return;
+    }
+    
+    try {
+      this.client = AIProjectsClient.fromConnectionString(
+        connectionString,
+        new DefaultAzureCredential()
+      );
+      this.agentId = agentId;
+      console.log("Azure AI Projects client initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize Azure AI Projects client:", error);
+      this.client = null;
+      this.agentId = null;
+    }
   }
 
   async getOrCreateThread(sessionId) {
+    if (!this.client) {
+      throw new Error("Azure AI Projects client not initialized");
+    }
+    
     if (!agentThreads[sessionId]) {
       const thread = await this.client.agents.createThread();
       agentThreads[sessionId] = thread.id;
@@ -27,6 +54,14 @@ export class AgentService {
   }
 
   async processMessage(sessionId, message) {
+    // Check if the client is properly initialized
+    if (!this.client || !this.agentId) {
+      console.warn("Azure AI Projects client not configured. Falling back to basic response.");
+      return {
+        reply: "I'm currently not connected to the AI agent service. Please configure the Azure AI Projects connection.",
+      };
+    }
+    
     try {
       const threadId = await this.getOrCreateThread(sessionId);
 

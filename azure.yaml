@@ -8,18 +8,17 @@ services:
         project: packages/webapp
         host: staticwebapp
         language: js
-        dist: dist
-        hooks:
-            predeploy:
-                windows:
-                    shell: pwsh
-                    run: npm run build
-                posix:
-                    shell: sh
-                    run: npm run build
     
     webapi:
         project: packages/webapi
         host: appservice
         language: js
-        resourceName: webapi-unique123
+
+hooks:
+    predeploy:
+        windows:
+            shell: sh
+            run: cd packages/webapp && npm run build
+        posix:
+            shell: sh
+            run: cd packages/webapp && npm run build
